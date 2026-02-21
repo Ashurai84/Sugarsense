@@ -50,7 +50,6 @@
 
 ### 🛍️ **Diabetes-Friendly Store**
 - **Curated Products** - Shop verified diabetic-friendly food and supplies
-- **3D Product Viewer** - Interactive 3D visualization of products
 - **Easy Checkout** - Seamless shopping experience
 - **Order Tracking** - Keep track of all your orders
 
