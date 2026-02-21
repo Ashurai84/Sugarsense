@@ -4,7 +4,7 @@
 
 ### Your Intelligent Diabetes Management Companion
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-SugarSense-00C853?style=for-the-badge&logoColor=white)](https://sugarsense-app.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-SugarSense-00C853?style=for-the-badge&logoColor=white)](https://sugarsense-8hbjhcxti-ashurai84s-projects.vercel.app/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-12.1-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
@@ -14,7 +14,7 @@
 
 **Empowering diabetics with AI-driven insights, personalized health tracking, and smart lifestyle recommendations.**
 
-[🚀 Live Demo](https://sugarsense-app.vercel.app/) • [📖 Features](#-features) • [🛠️ Tech Stack](#️-tech-stack) • [⚡ Quick Start](#-quick-start)
+[🚀 Live Demo](https://sugarsense-8hbjhcxti-ashurai84s-projects.vercel.app/) • [📖 Features](#-features) • [🛠️ Tech Stack](#️-tech-stack) • [⚡ Quick Start](#-quick-start)
 
 </div>
 
