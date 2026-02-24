@@ -101,11 +101,11 @@ const LandingPage: React.FC = () => {
           {/* Logo */}
           <div className="mb-8">
             <img
-              src="/assets/logo/Untitled_design__1_-removebg-preview.png"
+              src="/assets/logo/sugar-sense.png"
               alt="Sugar Sense Logo"
-              className="w-32 h-32 mx-auto mb-6 transition-all duration-300 filter dark:drop-shadow-none drop-shadow-lg"
+              className="w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-6"
               style={{
-                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1))'
+                filter: 'drop-shadow(0 0 16px rgba(20, 184, 166, 0.35))'
               }}
             />
             
@@ -140,8 +140,8 @@ const LandingPage: React.FC = () => {
 
           {/* 3D Floating Medical Elements */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/4 left-1/4 w-16 h-16 bg-gradient-to-br from-red-400/20 to-pink-400/20 rounded-full animate-float-slow">
-              <div className="w-full h-full flex items-center justify-center text-2xl">❤️</div>
+            <div className="absolute top-20 left-6 sm:top-24 sm:left-10 lg:top-1/4 lg:left-1/4 w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-red-400/20 to-pink-400/20 rounded-full animate-float-slow">
+              <div className="w-full h-full flex items-center justify-center text-xl sm:text-2xl">❤️</div>
             </div>
             <div className="absolute top-1/3 right-1/4 w-12 h-12 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-lg animate-float-medium transform rotate-45">
               <div className="w-full h-full flex items-center justify-center text-xl transform -rotate-45">🛡️</div>

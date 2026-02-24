@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, auth } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { getActiveDummySession } from '../utils/dummyAuth';
 
 interface UserProfile {
   name: string;
@@ -46,7 +47,42 @@ const Profile: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      const dummySession = getActiveDummySession();
+      if (dummySession) {
+        const localProfile = localStorage.getItem(`sugarsense_patient_profile_${dummySession.id}`);
+
+        if (localProfile) {
+          try {
+            const parsed = JSON.parse(localProfile);
+            setProfile((prev) => ({
+              ...prev,
+              name: parsed.name || '',
+              email: parsed.email || dummySession.email,
+              phone: parsed.phone || '',
+              age: parsed.age || 0,
+              gender: parsed.gender || '',
+              weight: parsed.weight || 0,
+              height: parsed.height || 0,
+              bloodGlucose: parsed.fasting_glucose || 0,
+              hba1c: parsed.hba1c || 0,
+              bloodPressure: {
+                systolic: parsed.blood_pressure_systolic || 0,
+                diastolic: parsed.blood_pressure_diastolic || 0,
+              },
+              updatedAt: parsed.updatedAt ? new Date(parsed.updatedAt) : new Date(),
+            }));
+          } catch {
+            setProfile((prev) => ({ ...prev, email: dummySession.email }));
+          }
+        } else {
+          setProfile((prev) => ({ ...prev, email: dummySession.email }));
+        }
+      }
+
+      setLoading(false);
+      return;
+    }
 
     const profileRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(profileRef, (doc) => {
@@ -162,7 +198,47 @@ const Profile: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!validateForm() || !user) return;
+    if (!validateForm()) return;
+
+    if (!user) {
+      const dummySession = getActiveDummySession();
+      if (!dummySession) return;
+
+      setSaving(true);
+      try {
+        const existingRaw = localStorage.getItem(`sugarsense_patient_profile_${dummySession.id}`);
+        const existing = existingRaw ? JSON.parse(existingRaw) : {};
+
+        localStorage.setItem(
+          `sugarsense_patient_profile_${dummySession.id}`,
+          JSON.stringify({
+            ...existing,
+            userId: dummySession.id,
+            name: profile.name,
+            email: profile.email || dummySession.email,
+            phone: profile.phone,
+            age: profile.age,
+            gender: profile.gender,
+            weight: profile.weight,
+            height: profile.height,
+            fasting_glucose: profile.bloodGlucose,
+            hba1c: profile.hba1c,
+            blood_pressure_systolic: profile.bloodPressure.systolic,
+            blood_pressure_diastolic: profile.bloodPressure.diastolic,
+            updatedAt: new Date().toISOString(),
+          })
+        );
+
+        setIsEditing(false);
+        setErrors({});
+      } catch {
+        setErrors({ submit: 'Failed to save profile. Please try again.' });
+      } finally {
+        setSaving(false);
+      }
+
+      return;
+    }
 
     setSaving(true);
     try {

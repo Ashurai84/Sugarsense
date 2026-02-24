@@ -24,6 +24,20 @@
 
 **SugarSense** is a comprehensive diabetes management platform that combines cutting-edge AI technology with intuitive health tracking tools. Whether you're newly diagnosed or have been managing diabetes for years, SugarSense provides personalized insights to help you maintain optimal blood sugar levels and live a healthier life.
 
+## 📌 Project Status
+
+This project is currently **paused** for active feature development and is being maintained as a **demo overview** of the SugarSense product direction.
+
+### Why paused?
+- The current focus is showcasing the concept, UX, and core flow in demo form.
+- Production integration work (full backend auth/data hardening) is deferred for now.
+
+### What changed recently
+- Added a **dummy login flow** (no Firebase auth required) for quick exploration.
+- Added a **one-click demo account** with seeded sample patient and order data.
+- Added dummy-data fallback in dashboard, orders, profile, and checkout so demo mode works end-to-end.
+- Updated landing hero logo presentation to improve visibility and then simplified it to a clean standalone logo.
+
 <div align="center">
 
 | 📊 Track | 🤖 AI Coach | 🛒 Store | 📈 Reports |

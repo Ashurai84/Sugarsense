@@ -6,6 +6,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCart } from '../context/CartContext';
+import { getActiveDummySession, getDummyOrders, saveDummyOrders } from '../utils/dummyAuth';
 
 const Checkout: React.FC = () => {
   const [user] = useAuthState(auth);
@@ -44,14 +45,17 @@ const Checkout: React.FC = () => {
   };
 
   const handlePlaceOrder = async () => {
-    if (!user) return;
-    
     setPlacingOrder(true);
     
     try {
-      // Create order in Firestore
+      const activeUserId = user?.uid || getActiveDummySession()?.id;
+      if (!activeUserId) {
+        setPlacingOrder(false);
+        return;
+      }
+
       const orderData = {
-        userId: user.uid,
+        userId: activeUserId,
         items: items.map(item => ({
           productId: item.id,
           productName: item.name,
@@ -75,7 +79,18 @@ const Checkout: React.FC = () => {
         }
       };
 
-      await addDoc(collection(db, 'orders'), orderData);
+      if (user) {
+        await addDoc(collection(db, 'orders'), orderData);
+      } else {
+        const existingOrders = getDummyOrders(activeUserId);
+        const localOrder = {
+          ...orderData,
+          id: `local-order-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+        };
+        saveDummyOrders(activeUserId, [localOrder, ...existingOrders]);
+      }
+
       setOrderPlaced(true);
       
       // Clear cart after successful order

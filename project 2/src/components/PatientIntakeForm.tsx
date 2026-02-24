@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Heart, Pill, Target, Phone, Save, Mail } from 'lucide-react';
-import { auth, db } from '../lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { getActiveDummySession } from '../utils/dummyAuth';
 
 interface PatientIntakeFormProps {
   onComplete: () => void;
 }
 
 const PatientIntakeForm: React.FC<PatientIntakeFormProps> = ({ onComplete }) => {
+  const activeSession = getActiveDummySession();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     // Personal Information
     name: '',
-    email: auth.currentUser?.email || '',
+    email: activeSession?.email || '',
     phone: '',
     age: '',
     gender: '',
@@ -95,14 +95,12 @@ const PatientIntakeForm: React.FC<PatientIntakeFormProps> = ({ onComplete }) => 
     setSubmitError('');
     
     try {
-      const user = auth.currentUser;
-      if (!user) {
-        throw new Error('User not authenticated');
+      if (!activeSession) {
+        throw new Error('Session not found. Please login again.');
       }
 
-      // Save to Firestore
-      await setDoc(doc(db, 'patient_profiles', user.uid), {
-          userId: user.uid,
+      const intakeRecord = {
+          userId: activeSession.id,
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
@@ -141,7 +139,12 @@ const PatientIntakeForm: React.FC<PatientIntakeFormProps> = ({ onComplete }) => 
           emergencyContactEmail: formData.emergencyContact.email,
           createdAt: new Date(),
           updatedAt: new Date()
-        });
+      };
+
+      localStorage.setItem(
+        `sugarsense_patient_profile_${activeSession.id}`,
+        JSON.stringify(intakeRecord)
+      );
 
       onComplete();
     } catch (error) {
@@ -175,7 +178,6 @@ const PatientIntakeForm: React.FC<PatientIntakeFormProps> = ({ onComplete }) => 
                 <input
                   type="email"
                   value={formData.email}
-                  defaultValue={auth.currentUser?.email || ''}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   required
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"

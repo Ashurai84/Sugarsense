@@ -12,11 +12,10 @@ import {
   LogOut,
   Package
 } from 'lucide-react';
-import { auth } from '../lib/firebase';
-import { signOut } from 'firebase/auth';
 import { useCart } from '../context/CartContext';
 import CartDrawer from './CartDrawer';
 import ThemeToggle from './ThemeToggle';
+import { signOutDummy } from '../utils/dummyAuth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -35,11 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+    signOutDummy();
   };
 
   return (

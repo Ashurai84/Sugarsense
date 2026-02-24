@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Package, Clock, CheckCircle, Truck, Calendar, ArrowLeft } from 'lucide-react';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { getActiveDummySession, getDummyOrders } from '../utils/dummyAuth';
 
 interface OrderItem {
   productId: string;
@@ -37,7 +38,21 @@ const Orders: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      const dummySession = getActiveDummySession();
+      if (dummySession) {
+        const localOrders = getDummyOrders(dummySession.id).map((order) => ({
+          ...order,
+          timestamp: new Date(order.timestamp),
+        })) as Order[];
+        localOrders.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+        setOrders(localOrders);
+      } else {
+        setOrders([]);
+      }
+      setLoading(false);
+      return;
+    }
 
     const ordersRef = collection(db, 'orders');
     const q = query(

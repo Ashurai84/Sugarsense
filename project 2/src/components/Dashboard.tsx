@@ -16,7 +16,6 @@ import {
   collection,
   query,
   where,
-  orderBy,
   onSnapshot,
 } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
@@ -24,6 +23,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import BloodSugarChart from "./BloodSugarChart";
 import QuickActionsCard from "./QuickActionsCard";
 import TodaysPlan from "./TodaysPlan";
+import { getActiveDummySession, getDummyOrders } from "../utils/dummyAuth";
 
 interface OrderItem {
   productId: string;
@@ -93,7 +93,40 @@ const Dashboard: React.FC = () => {
   // ---------------------------------
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      const dummySession = getActiveDummySession();
+      if (dummySession) {
+        const localOrders = getDummyOrders(dummySession.id).map((order) => ({
+          ...order,
+          timestamp: new Date(order.timestamp),
+        })) as Order[];
+        localOrders.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+        setOrders(localOrders);
+
+        const localProfile = localStorage.getItem(`sugarsense_patient_profile_${dummySession.id}`);
+        if (localProfile) {
+          try {
+            const parsed = JSON.parse(localProfile);
+            setUserProfile({
+              emergencyContact: {
+                name: parsed.emergency_contact_name,
+                phone: parsed.emergency_contact_phone,
+              },
+            });
+          } catch {
+            setUserProfile(null);
+          }
+        } else {
+          setUserProfile(null);
+        }
+      } else {
+        setOrders([]);
+        setUserProfile(null);
+      }
+
+      setLoading(false);
+      return;
+    }
 
     const ordersRef = collection(db, "orders");
     const q = query(ordersRef, where("userId", "==", user.uid));
@@ -300,7 +333,7 @@ const Dashboard: React.FC = () => {
                 : new Date().getHours() < 18
                 ? "afternoon"
                 : "evening"}
-              , {user?.displayName || "there"}! 👋
+              , {user?.displayName || getActiveDummySession()?.email?.split("@")[0] || "there"}! 👋
             </h1>
             <p className="text-body-lg theme-text-secondary">
               {new Date().toLocaleDateString("en-US", {

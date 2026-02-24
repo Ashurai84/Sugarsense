@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from './lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 import PatientIntakeForm from './components/PatientIntakeForm';
@@ -25,40 +22,44 @@ import { CartProvider } from './context/CartContext';
 import { UserProvider } from './context/UserContext';
 import { AIProvider } from './context/AIContext';
 import { ThemeProvider } from './context/ThemeContext';
+import {
+  DUMMY_AUTH_EVENT,
+  DummySession,
+  ensureDemoAccount,
+  getActiveDummySession,
+  hasCompletedIntake as hasCompletedDummyIntake,
+  markIntakeCompleted,
+} from './utils/dummyAuth';
 
 const AppContent = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<DummySession | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasCompletedIntake, setHasCompletedIntake] = useState(false);
 
   useEffect(() => {
-    // Listen for auth changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) {
-        checkIntakeCompletion(user.uid);
+    ensureDemoAccount();
+
+    const syncSession = () => {
+      const session = getActiveDummySession();
+      setUser(session);
+      if (session) {
+        setHasCompletedIntake(hasCompletedDummyIntake(session.id));
       } else {
         setHasCompletedIntake(false);
-        setLoading(false);
       }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const checkIntakeCompletion = async (userId: string) => {
-    try {
-      const docRef = doc(db, 'patient_profiles', userId);
-      const docSnap = await getDoc(docRef);
-
-      setHasCompletedIntake(docSnap.exists());
-    } catch (error) {
-      console.error('Error checking intake completion:', error);
-      setHasCompletedIntake(false);
-    } finally {
       setLoading(false);
-    }
-  };
+    };
+
+    syncSession();
+
+    window.addEventListener('storage', syncSession);
+    window.addEventListener(DUMMY_AUTH_EVENT, syncSession);
+
+    return () => {
+      window.removeEventListener('storage', syncSession);
+      window.removeEventListener(DUMMY_AUTH_EVENT, syncSession);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -79,7 +80,14 @@ const AppContent = () => {
         {user && !hasCompletedIntake && (
           <Route 
             path="/intake" 
-            element={<PatientIntakeForm onComplete={() => setHasCompletedIntake(true)} />} 
+            element={
+              <PatientIntakeForm
+                onComplete={() => {
+                  markIntakeCompleted(user.id);
+                  setHasCompletedIntake(true);
+                }}
+              />
+            }
           />
         )}
         
